@@ -9,7 +9,7 @@ const USER_AGENT = "ArabicRadioApp/0.1"
 
 async function request(path, params){
     const query = new URLSearchParams(params).toString();
-    let lasstError;
+    let lastError;
 
     for (const server of SERVICES) {
         const url = `${server}${path}?${query}`;
