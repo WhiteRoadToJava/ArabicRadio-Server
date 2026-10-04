@@ -1,7 +1,6 @@
-import { DatabaseSync } from 'node:sqlite';
-import {mkdirSync} from "node:fs";
-import {dirname} from "node:path";
-
+import { DatabaseSync } from "node:sqlite";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 const DB_PATH = process.env.DB_PATH || "data/radio.db";
 
@@ -31,4 +30,13 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_stations_country
     ON stations (country_code);
+
+      CREATE TABLE IF NOT EXISTS geocode_cache (
+        cache_key         TEXT PRIMARY KEY,
+        found             TEXT,
+        lat               REAL,
+        lng               REAL,
+        bbox              TEXT,
+        created_at        TEXT  NOT NULL
+      );
     `);

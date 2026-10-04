@@ -7,8 +7,10 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "fetch:test": "node src/scripts/testFetch.js",
-    "sync": "node src/scripts/runSync.js"
+    "inspect": "node src/scripts/inspect.js",
+    "sync": "node --env-file-if-exists=.env src/scripts/runSync.js"
   },
+ 
   "keywords": [],
   "author": "",
   "license": "ISC",
