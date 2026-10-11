@@ -1,4 +1,5 @@
 import { db } from "../db/database.js";
+import { getStationStats } from "../db/stationsRepo.js";
 
 // كم محطة على مستوى الدولة لها state؟
 const withState = db
@@ -14,3 +15,9 @@ const notFound = db
   .all();
 console.log(`Not found by Nominatim (${notFound.length}):`);
 console.table(notFound);
+
+console.log("Stations by source and status:");
+console.table(getStationStats());
+
+console.log("Applied migrations:");
+console.table(db.prepare("SELECT * FROM schema_migrations").all());

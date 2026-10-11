@@ -3,7 +3,7 @@ export function notfoundHandler(req, res){
 }
 
 
-export function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, _next) {
     console.error(err);
     res.status(500).json({error: "Internal server error"})
 }

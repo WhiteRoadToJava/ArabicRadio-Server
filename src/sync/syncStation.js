@@ -1,45 +1,53 @@
-import { LANGUAGE } from '../config.js';
-import { fetchStationsByLanguage } from '../services/radioBrowser.js';
-import { mapStation } from './mapStation.js';
+import { LANGUAGE } from "../config.js";
+import { fetchStationsByLanguage } from "../services/radioBrowser.js";
+import { mapStation } from "./mapStation.js";
+import { locateStation } from "./locationStation.js";
 import {
-  upsertStations,
-  deleteStationsNotSyncedSince,
+  importStations,
+  deactivateMissingStations,
+  countActiveImported,
   countStations,
-} from '../db/stationsRepo.js';
-import { locateStation } from './locationStation.js';
+} from "../db/stationsRepo.js";
 
 export async function runSync() {
-    const syncedAt = new Date().toISOString();
-    const raw = await fetchStationsByLanguage(LANGUAGE);
-    if( raw.length === 0 ) {
-        throw new Error(`Radio Browser returned 0 stations, sync aborted`);
-    }
+  const syncStartedAt = new Date().toISOString();
 
-    const stations = raw
+  const raw = await fetchStationsByLanguage(LANGUAGE);
+  if (raw.length === 0) {
+    throw new Error("Radio Browser returned 0 stations, sync aborted");
+  }
+
+  const stations = raw
     .map(mapStation)
     .filter((s) => s.uuid && s.name && s.stream_url);
 
-        // تحديد موقع كل محطة، واحدة تلو الأخرى
-    const located = [];
-    for (const station of stations) {
-        located.push(await locateStation(station));
-    }
+  // حماية: إن وصل أقل من نصف ما نعرفه، فالرد على الأرجح ناقص
+  const previouslyActive = countActiveImported();
+  if (previouslyActive > 0 && stations.length < previouslyActive * 0.5) {
+    throw new Error(
+      `Suspicious sync: got ${stations.length} stations, expected about ${previouslyActive}. Aborted.`
+    );
+  }
 
-    upsertStations(located, syncedAt);
-    const deleted = deleteStationsNotSyncedSince(syncedAt);
+  const located = [];
+  for (const station of stations) {
+    located.push(await locateStation(station));
+  }
 
-    // إحصائية بمستويات الدقة
-    const geo = { exact: 0, city: 0, country: 0, none: 0 };
-    for (const s of located) {
-        geo[s.geo_source ?? 'none']++;
-    }
+  importStations(located, syncStartedAt);
+  const deactivated = deactivateMissingStations(syncStartedAt);
 
-    return {
-        fetched: raw.length,
-        saved: located.length,
-        skipped: raw.length - stations.length,
-        deleted,
-        total: countStations(),
-        ...geo,
-    };
+  const geo = { exact: 0, city: 0, country: 0, none: 0 };
+  for (const s of located) {
+    geo[s.geo_source ?? "none"]++;
+  }
+
+  return {
+    fetched: raw.length,
+    imported: located.length,
+    skipped: raw.length - stations.length,
+    deactivated,
+    visible: countStations(),
+    ...geo,
+  };
 }

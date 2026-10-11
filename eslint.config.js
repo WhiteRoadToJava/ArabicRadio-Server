@@ -12,7 +12,7 @@ export default[
             globals: {...globals.node}
         },
         rules:{
-            "no-unused-vars": "warn",
+            "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
         },
     },
 ];
