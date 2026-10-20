@@ -3,6 +3,9 @@ import {healthRouter} from "./health.js"
 import { stationsRouter } from "./stations.js";
 import { countriesRouter } from "./countries.js";
 import { adminStationsRouter } from "./adminStations.js";
+import { playsRouter } from "./plays.js";
+
+
 
 
 
@@ -12,3 +15,5 @@ apiRouter.use("/stations", stationsRouter);
 apiRouter.use("/countries", countriesRouter);
 apiRouter.use("/health", healthRouter);
 apiRouter.use("/admin/stations", adminStationsRouter);
+
+apiRouter.use("/players", playsRouter);
