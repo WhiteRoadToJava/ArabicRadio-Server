@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3000/api/admin/stations
+@token = {{$dotenv ADMIN_API_KEY}}
+
+### بدون مفتاح: يجب أن يعيد 401
+GET {{baseUrl}}
+
+### قائمة المحطات الخاصة
+GET {{baseUrl}}?source=custom
+Authorization: Bearer {{token}}
+
+### إضافة محطة خاصة (ضع رابط بث حقيقياً)
+POST {{baseUrl}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "محطة تجريبية",
+  "stream_url": "https://example.com/stream.mp3",
+  "country_code": "SY",
+  "state": "Damascus"
+}
+
+### بيانات خاطئة: يجب أن يعيد 400 مع قائمة الأخطاء
+POST {{baseUrl}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "stream_url": "not-a-url",
+  "country_code": "Syria"
+}
